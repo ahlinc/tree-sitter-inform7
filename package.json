@@ -1,0 +1,17 @@
+{
+  "name": "tree-sitter-inform7",
+  "version": "1.0.0",
+  "description": "parser for inform 7",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kelly macneill",
+  "license": "ISC",
+  "dependencies": {
+    "nan": "^2.14.2"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.19.3"
+  }
+}
