@@ -2,13 +2,9 @@
 
 
 
-Section 1 - Rules
+section     1 - Rules
 
-Section - Rules for cats
-
-cat is a kind of animal.
-
-
+Section  - Rules for cats
 
 a dog is a kind of thing.
 
@@ -19,3 +15,6 @@ A hefty springloaded knife switch is a scenery device in your room.
 
 a thing has some text called flavor.
 a thing can be conductive. a thing is usually not conductive.
+a cat has a number called purr power. the purr power of a cat is usually 0.
+
+a cat is a kind of animal.
