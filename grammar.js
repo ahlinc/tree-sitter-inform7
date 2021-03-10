@@ -71,16 +71,21 @@ module.exports = grammar({
         not_expression: $ => prec.left(seq( space("not"), $._expression)),
         usually_expression: $ => prec.left(seq( space("usually"), $._expression)),
         in_expression: $ => prec.left(seq($._expression, space("in"), $._expression)),
-            
+        comma_separated_list: $ => prec.right(seq(
+            $._expression,
+            repeat1(prec.left(seq(",", optional("and"), $._expression))),
+        )),
+
         _expression: $ => choice(
             $.kind_of_expression,
-            //$.of_expression,
+            $.of_expression,
             $.identifier,
             $.not_expression,
             $.usually_expression,
             $.in_expression,
             $.built_in_type,
             $.number,
+            $.comma_separated_list,
         ),
 
 
