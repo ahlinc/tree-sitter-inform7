@@ -37,6 +37,11 @@ module.exports = grammar({
         understand_statement: $ => seq( /[uU]nderstand +/, space($.string_literal), space("as"), $._expression, $.full_stop),
         has_statement: $ => seq($._expression, space("has"), $._expression, space("called"), $._expression, $.full_stop),
         can_be_statement: $ => seq($._expression, space("can be"), $._expression, $.full_stop),
+        action_statement: $ => seq($._expression, /is +an +action +applying +to +/, $.action_quantifier, $.full_stop),
+        action_quantifier: $ => choice(
+            "nothing",
+            seq(space($.number), $._expression),
+        ),
 
         is_statement: $ => seq(
             $._expression,
@@ -51,6 +56,7 @@ module.exports = grammar({
             $.understand_statement,
             $.has_statement,
             $.can_be_statement,
+            $.action_statement,
         ),
 
 
@@ -71,6 +77,7 @@ module.exports = grammar({
         not_expression: $ => prec.left(seq( space("not"), $._expression)),
         usually_expression: $ => prec.left(seq( space("usually"), $._expression)),
         in_expression: $ => prec.left(seq($._expression, space("in"), $._expression)),
+ 
         comma_separated_list: $ => prec.right(seq(
             $._expression,
             repeat1(prec.left(seq(",", optional("and"), $._expression))),
@@ -98,7 +105,7 @@ module.exports = grammar({
             '"',
           ),
     
-        number: $ => /\d+/
+        number: $ => choice("zero", "one","two","three","four","five","six","seven","eight","nine","ten","eleven","tweleve", /\d+/),
       }
 });
   

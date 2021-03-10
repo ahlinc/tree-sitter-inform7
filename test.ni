@@ -19,3 +19,6 @@ a cat has a number called purr power. the purr power of a cat is usually 0.
 
 a cat is a kind of animal.
 a config is a kind of value. The configs are loaf, floop, bagpipes, and the gom jabbar.
+
+understand "use [something]" as using.
+using is an action applying to one thing.
