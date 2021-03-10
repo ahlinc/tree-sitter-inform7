@@ -96,11 +96,15 @@ module.exports = grammar({
         ),
 
 
-        
+        text_substitution: $=> seq("[", $._expression, "]", ),
+
         string_literal: $ => seq(
             '"',
             repeat(
-              token.immediate(prec(1, /[^\\"\n]+/)),
+                choice(
+                    $.text_substitution,
+                    token.immediate(prec(1, /[^\\"\[\]]+/)),
+                ),
             ),
             '"',
           ),
