@@ -16,7 +16,6 @@ enum TokenType {
   DEDENT,
 };
 
-
 struct Scanner {
   Scanner() {
     deserialize(NULL, 0);
@@ -58,7 +57,9 @@ struct Scanner {
   }
 
   bool scan(TSLexer *lexer, const bool *valid_symbols) {
- 
+
+    lexer->mark_end(lexer);
+
     bool found_end_of_line = false;
     uint32_t indent_length = 0;
     for (;;) {

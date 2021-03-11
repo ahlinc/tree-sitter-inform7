@@ -2,23 +2,27 @@ module.exports = grammar({
     name: 'inform7',
     word: $ => $.word,
     extras: $ =>
-    [
-        $.block_comment,
-        /\s+/,
-    ],
-    conflicts: $ =>[
+        [
+            $.block_comment,
+            /\s+/,
+        ],
+    conflicts: $ => [
     ],
 
+    inline: $ => [
+        $.suite,
+    ],
 
     externals: $ => [
         $._newline,
         $._indent,
         $._dedent,
       ],
+    
 
     rules: {
         source_file: $ => seq($.title, repeat1($._statement)),
-        _space: $=> token(/ +/),
+        _space: $ => token(/ +/),
         word: $ => /[a-zA-Z][a-zA-Z0-9_]*/,
         identifier: $ => seq(
             optional($._article),
@@ -28,12 +32,10 @@ module.exports = grammar({
             '[',
             repeat(choice(/./, $.block_comment)),
             ']'
-          ),
+        ),
     
-        line_ending: $ => "\n",
-          
-        title: $ => seq($.string_literal, spaced("by"), $.identifier, $.line_ending ),
-        section_heading: $ => seq(s("section"), optional($.number), "-", $.identifier, $.line_ending),
+        title: $ => seq($.string_literal, spaced("by"), $.identifier, $._newline),
+        section_heading: $ => seq(s("section"), optional($.number), "-", $.identifier, $._newline),
         indefinite_article: $ => seq(choice(s("a"), s("an"))),
         definite_article: $ => s("the"),
         mass_article: $ => s("some"),
@@ -41,42 +43,62 @@ module.exports = grammar({
 
         full_stop: $ => ".",
         semicolon: $ => ";",
-        understand_statement: $ => seq( s("understand"), space($.string_literal), s("as"), $._expression, $.full_stop),
+        understand_statement: $ => seq(s("understand"), space($.string_literal), s("as"), $._expression, $.full_stop),
         has_statement: $ => seq($._expression, s("has"), $._expression, s("called"), $._expression, $.full_stop),
-        can_be_statement: $ => seq($._expression, s("can"),  s("be"), $._expression, $.full_stop),
+        can_be_statement: $ => seq($._expression, s("can"), s("be"), $._expression, $.full_stop),
         action_statement: $ => seq($._expression, /is +an +action +applying +to +/, $.action_quantifier, $.full_stop),
         action_quantifier: $ => choice(
             CI("nothing"),
             seq(space($.number), $._expression),
         ),
 
-
         is_fragment: $ => seq(
             $._expression,
-            choice( s("is"), s("are") ),
+            choice(s("is"), s("are")),
             $._expression,
-            choice($.full_stop, $.semicolon),
         ),
 
-
-        relation: $ =>  repeat1(seq($.word, optional($._space))),
+        _fragment_termination: $ => choice($.full_stop, $.semicolon),
 
         relational_fragment: $ => seq(
             $._expression,
-            choice($.full_stop, $.semicolon),
+        ),
+
+        say_statement: $ => seq(
+            s("say"),
+            $.string_literal,
+            optional($._fragment_termination)
         ),
 
         now_statement: $ => seq(
-            s("now"), 
+            s("now"),
             choice(
                 $.is_fragment,
                 $.relational_fragment,
-            )
+            ),
+            $._fragment_termination,
+        ),
+
+
+        otherwise: $ => choice(
+            seq(s("otherwise"), $.if_statment),
+            seq(CI("otherwise"), ":", $.suite)
+        ),
+            
+
+        if_statment: $ => seq(
+            s("if"),
+            choice(
+                $.is_fragment,
+                $._expression,
+            ),
+            ":",
+            $.suite,
         ),
 
         is_statement: $ => seq(
             $._expression,
-            choice( s("is"), s("are") ),
+            choice(s("is"), s("are")),
             $._expression,
             $.full_stop
         ),
@@ -88,24 +110,51 @@ module.exports = grammar({
             $.has_statement,
             $.can_be_statement,
             $.action_statement,
-            $.after_statement,
+            $.shorthand_rule,
         ),
 
-        _suite: $ => choice(
+        suite: $ => choice(
             seq($._indent, $.block),
-            alias($._newline, $.block)
-          ),
+            alias($._newline, $.block),
+        ),
+
+
+        _fragment: $ => seq(
+            choice(
+                $.now_statement,
+                $.if_statment,
+                $.say_statement,
+                $.otherwise,
+            ),
+            $._newline
+        ),
+            
 
         block: $ => seq(
-            repeat($.now_statement),
+            repeat($._fragment),
             $._dedent
         ),
         
-        after_statement: $ => seq(
-            CI("after"),
+
+        after: $ => s("after"),
+        carry_out: $ => seq(s("carry"), s("out")),
+        instead: $ => seq( s("instead"), optional(s("of")) ),
+        check: $ => s("check"),
+        report: $ => s("report"),
+
+        _shortand_rule_type: $ => choice(
+            $.after,
+            $.carry_out,
+            $.instead,
+            $.check,
+            $.report,
+        ),           
+
+        shorthand_rule: $ => seq(
+            $._shortand_rule_type,
             $._expression,
             ":",
-            $._suite,
+            $.suite,
         ),
 
         number_type: $ => "number",
@@ -125,7 +174,20 @@ module.exports = grammar({
         not_expression: $ => prec.left(seq( s("not"), $._expression)),
         usually_expression: $ => prec.left(seq( s("usually"), $._expression)),
         in_expression: $ => prec.left(seq($._expression, s("in"), $._expression)),
- 
+        provides_expression: $ => prec.left(seq($._expression, s("provides"), $._expression)),
+        called_parenthetical: $ => prec.right(seq($._expression,
+            "(",
+            s("called"),
+            $.identifier,
+            ")"
+        )),
+
+        binary_expression: $ => prec.left(seq(
+            $._expression,
+            token(choice(">", "<", "+", "-", "*", "/", ">=", "<=", s("and"), s("or") )),
+            $._expression,
+        )),
+
         comma_separated_list: $ => prec.right(seq(
             $._expression,
             repeat1(prec.left(seq(",", optional(s("and")), $._expression))),
@@ -141,10 +203,19 @@ module.exports = grammar({
             $.built_in_type,
             $.number,
             $.comma_separated_list,
+            $.provides_expression,
+            $.binary_expression,
+            $.called_parenthetical,
         ),
 
-
-        text_substitution: $=> seq("[", $._expression, "]", ),
+        // this needs a lot of work.
+        text_substitution: $ => seq("[",choice(
+            $._expression,
+            "one of",
+            "'re",
+            "/i"
+            ),   
+        "]"),
 
         string_literal: $ => seq(
             '"',
