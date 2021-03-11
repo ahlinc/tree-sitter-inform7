@@ -22,3 +22,15 @@ a config is a kind of value. The configs are loaf, floop, bagpipes, and the gom 
 
 understand "use [something]" as using.
 using is an action applying to one thing.
+
+The dog is a thing.
+the dog is A thing.
+
+a cat is a kind of animal.
+
+after taking:
+    now the emblem is nowhere;
+	now the nice little dog chews on the unscrupulous key.
+	
+
+a spicy potato is a kind of thing.
