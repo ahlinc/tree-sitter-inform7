@@ -40,6 +40,6 @@ After examining a cat (called kitty):
 		say "[noun] is rumbling. [They] is beginning to lose the pretense of control.";
 	otherwise if the purr power of kitty  > 7:
 		say "[noun] is quaking, fissues in reality are starting to creep into my [italic type]purriphery[roman type] as a maelstrom of feral purr-energy consumes [them].";
-    otherwise:
-        say "garbage";
+	otherwise:
+		say "garbage";
 	Say "Current configuration: [config of kitty].";
