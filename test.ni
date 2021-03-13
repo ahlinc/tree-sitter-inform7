@@ -38,3 +38,29 @@ To decide which number is the max purr power of (kitty - a cat):
 		decide on 18;
 	otherwise:
 		decide on 9.
+
+
+To decide what price is the player's cash: 
+    let sum be the total price of money enclosed by the player; 
+    decide on sum. 
+
+
+To decide what price is the sum in (item - a container): 
+    let sum be the total price of the money in the item; 
+    decide on sum. 
+
+
+To decide what money is the best money from (buyer - a thing) for (cost - a price): 
+	repeat with bill offered running through money: 
+		if the bill offered is enclosed by the buyer: 
+			if the price of the bill offered is the cost, decide on the bill offered; 
+			if the price of the bill offered is greater than the cost, now the functional relation of bill offered is overpayment; 
+			otherwise now the functional relation of the bill offered is underpayment; 
+		otherwise: 
+			now the functional relation of the bill offered is irrelevant; 
+	[say "underpayment: [a list of underpayment money] 
+	overpayment: [a list of overpayment money]";] 
+	if the total price of underpayment money is less than the cost: 
+		decide on the cheapest money which is overpayment; 
+	otherwise: 
+		decide on the costliest money which is underpayment.

@@ -25,7 +25,7 @@ module.exports = grammar({
     rules: {
         source_file: $ => seq($.title, repeat1($._statement)),
         _space: $ => token(/ +/),
-        word: $ => /[a-zA-Z][a-zA-Z0-9_]*/,
+        word: $ => /[a-zA-Z][a-zA-Z0-9_']*/,
         identifier: $ => seq(
             optional($._article),
             repeat1(seq($.word, optional($._space)))
@@ -72,29 +72,32 @@ module.exports = grammar({
             $._expression,
         ),
 
-
-          if_statement: $ => seq(
-            'if',
-            field('condition', $._expression),
+        _block_following_if: $ => seq(
             ':',
             field('consequence', $.suite),
             repeat(field('alternative', $.elif_clause)),
             optional(field('alternative', $.else_clause))
-          ),
-      
-          elif_clause: $ => seq(
+        ),
+
+        if_statement: $ => seq(
+            s('if'),
+            field('condition', $._expression),
+            $._block_following_if
+        ),
+
+        elif_clause: $ => seq(
             s("otherwise"),
             s("if"),
             field('condition', $._expression),
             ':',
             field('consequence', $.suite)
-          ),
-      
-          else_clause: $ => seq(
-              'otherwise',
-              ":",
+        ),
+    
+        else_clause: $ => seq(
+            'otherwise',
+            ":",
             field('body', $.suite)
-          ),
+        ),
 
 
           /*
@@ -112,18 +115,58 @@ To decide which number is the max purr power of (kitty - a cat):
             $._expression,
         ),  
           
-        to_decide_statement: $ => seq(
-            s("to"), s("decide"),
-            choice(s("what"), s("which")),
-            field("type", choice($.identifier, $.value_type)),
-            s("is"),
-            field("name", $.identifier),
-            "of",
+
+        /*
+        To decide what price is the player's cash: 
+            let sum be the total price of money enclosed by the player; 
+            decide on sum. 
+
+        To decide what price is the sum in (item - a container): 
+            let sum be the total price of the money in the item; 
+            decide on sum. 
+
+        To decide what money is the best money from (buyer - a thing) for (cost - a price): 
+
+        To decide what number is double (N - a number) (this is doubling): 
+        */
+
+        parameter: $ => seq(
             "(",
             field("arg", $.identifier),
             "-",
             field("arg_type", $.identifier),
             ")",
+        ),
+
+        function_name: $ => seq(
+            "(",
+            s("this"), s("is"),
+            $.identifier,
+            ")"
+        ),
+
+        prototype_sequence: $ => repeat1(
+            choice(
+                $.word,
+                $.parameter,
+                $.function_name,
+            )
+        ),
+
+        // let sum be the total price of money enclosed by the player; 
+        let_statement: $ => seq(
+            s("let"),
+            $.identifier,
+            s("be"),
+            $._expression
+        ),
+
+        to_decide_statement: $ => seq(
+            s("to"), s("decide"),
+            choice(s("what"), s("which")),
+            field("type", choice($.identifier, $.value_type)),
+            s("is"),
+            $.prototype_sequence,
             ":",
             $.suite
           ),
@@ -135,8 +178,23 @@ To decide which number is the max purr power of (kitty - a cat):
             $._expression,
         ),
 
-        
+        // repeat with bill offered running through money: 
+        repeat_with_statement: $ => seq(
+            s("repeat"), s("with"),
+            field("iterator", $.identifier),
+            s("running"), s("through"),
+            field("range", $._expression),
+            ":",
+            $.suite
+        ),
 
+
+        simple_if: $ => seq(
+            s("if"),
+            $._expression,
+            ",",
+            $._simple_statement,
+        ),
 
         _simple_statements: $ => seq(
             $._simple_statement,
@@ -168,6 +226,8 @@ To decide which number is the max purr power of (kitty - a cat):
                 $.can_be_statement,
                 $.action_statement,
                 $.decide_statement,
+                $.let_statement,
+                $.simple_if,
             ),
         ),
             
@@ -179,7 +239,8 @@ To decide which number is the max purr power of (kitty - a cat):
         _compound_statement: $ => choice(
             $.if_statement,
             $.to_decide_statement,
-            $.shorthand_rule
+            $.shorthand_rule,
+            $.repeat_with_statement,
         ),
 
         block: $ => seq(
@@ -228,6 +289,7 @@ To decide which number is the max purr power of (kitty - a cat):
         usually_expression: $ => prec.left(seq( s("usually"), $._expression)),
         in_expression: $ => prec.left(seq($._expression, s("in"), $._expression)),
         provides_expression: $ => prec.left(seq($._expression, s("provides"), $._expression)),
+        enclosed_expression: $ => prec.right(seq(s("enclosed"), s("by"), $._expression)),
         called_parenthetical: $ => prec.right(seq($._expression,
             "(",
             s("called"),
