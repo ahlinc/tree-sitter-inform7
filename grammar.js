@@ -72,14 +72,6 @@ module.exports = grammar({
             $._expression,
         ),
 
-      
-        after_statement: $ => seq(
-            s('after'),
-            field('condition', $._expression),
-            ':',
-            field('consequence', $.suite),
-          ),
-      
 
           if_statement: $ => seq(
             'if',
@@ -104,12 +96,46 @@ module.exports = grammar({
             field('body', $.suite)
           ),
 
-      
+
+          /*
+          
+To decide which number is the max purr power of (kitty - a cat): 
+	if config of kitty is bagpipes:
+		decide on 18;
+	otherwise:
+        decide on 9.
+        */
+          
+        decide_statement: $ => seq(
+            s("decide"),
+            s("on"),
+            $._expression,
+        ),  
+          
+        to_decide_statement: $ => seq(
+            s("to"), s("decide"),
+            choice(s("what"), s("which")),
+            field("type", choice($.identifier, $.value_type)),
+            s("is"),
+            field("name", $.identifier),
+            "of",
+            "(",
+            field("arg", $.identifier),
+            "-",
+            field("arg_type", $.identifier),
+            ")",
+            ":",
+            $.suite
+          ),
+
+          
         is_statement: $ => seq(
             $._expression,
             choice(s("is"), s("are")),
             $._expression,
         ),
+
+        
 
 
         _simple_statements: $ => seq(
@@ -141,6 +167,7 @@ module.exports = grammar({
                 $.has_statement,
                 $.can_be_statement,
                 $.action_statement,
+                $.decide_statement,
             ),
         ),
             
@@ -151,6 +178,7 @@ module.exports = grammar({
       
         _compound_statement: $ => choice(
             $.if_statement,
+            $.to_decide_statement,
             $.shorthand_rule
         ),
 
@@ -209,7 +237,7 @@ module.exports = grammar({
 
         binary_expression: $ => prec.left(seq(
             $._expression,
-            token(choice(">", "<", "+", "-", "*", "/", ">=", "<=", spaced("and"), spaced("or") )),
+            token(choice(">", "<", "+", "-", "*", "/", ">=", "<=", s("and"), s("or") )),
             $._expression,
         )),
 

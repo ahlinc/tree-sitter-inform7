@@ -33,13 +33,8 @@ a cat is a kind of animal.
 a cat has a number called purr power. the purr power of a cat is usually 0.
 [a cat has a number called the max purr power. the max purr power of a cat is usually 9.]
 
-After examining a cat (called kitty):
-	if the purr power of kitty > 1:
-		say "[noun] is purring, as if pleasantly full of bees.";
-	otherwise if the purr power of kitty > 4 and the purr power of kitty < 7:
-		say "[noun] is rumbling. [They] is beginning to lose the pretense of control.";
-	otherwise if the purr power of kitty  > 7:
-		say "[noun] is quaking, fissues in reality are starting to creep into my [italic type]purriphery[roman type] as a maelstrom of feral purr-energy consumes [them].";
+To decide which number is the max purr power of (kitty - a cat): 
+	if config of kitty is bagpipes:
+		decide on 18;
 	otherwise:
-		say "garbage";
-	Say "Current configuration: [config of kitty].";
+		decide on 9.
