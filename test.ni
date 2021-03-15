@@ -6,11 +6,11 @@ a thing can be conductive. a thing is usually not conductive.
 
 after taking:
 	if the noun provides property flavor:
-		say "[run paragraph on][The noun] tastes like [the flavor of the noun]."
+		say "[run paragraph on][The noun] tastes like [the flavor of the noun].";
 		
 Instead of taking inventory: 
 	say "[if the player carries something] I've eaten [a list of things carried by the player][otherwise]i'm hungry";
-	say "[if the player wears something]. [We]['re] wearing [a list of things worn by the player][end if]." 
+	say "[if the player wears something]. [We]['re] wearing [a list of things worn by the player][end if]." ;
 
 
 understand "use [something]" as using.
@@ -24,10 +24,16 @@ understand "use [something carried] on/with [something]" as using it with.
 using it with is an action applying to two things.
 
 report using it with:
-	say "I can't figure out how to use [the noun] with [the second noun]."
+	say "I can't figure out how to use [the noun] with [the second noun].";
 
 
 Section - Rules for cats
+
+a config is a kind of value. The configs are loaf, floop, bagpipes, and the gom jabbar.
+a cat has a config.
+A configuration is a kind of thing. A configuration is a part of every cat. 
+understand "config" as configuration.
+
 
 a cat is a kind of animal.
 a cat has a number called purr power. the purr power of a cat is usually 0.

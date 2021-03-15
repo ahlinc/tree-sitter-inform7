@@ -7,6 +7,7 @@ module.exports = grammar({
             /[\s\f\uFEFF\u2060\u200B]|\\\r?\n/
         ],
     conflicts: $ => [
+        //[$.simple_if, $.comma_separated_list]
     ],
 
     inline: $ => [
@@ -16,16 +17,16 @@ module.exports = grammar({
     ],
 
     externals: $ => [
-        $._newline,
+        $.newline,
         $._indent,
         $._dedent,
       ],
 
 
     rules: {
-        source_file: $ => seq($.title, repeat1($._statement)),
+        source_file: $ => seq($.title, repeat($._statement)),
         _space: $ => token(/ +/),
-        word: $ => /[a-zA-Z][a-zA-Z0-9_']*/,
+        word: $ => /[a-zA-Z0-9_/']+/,
         identifier: $ => seq(
             optional($._article),
             repeat1(seq($.word, optional($._space)))
@@ -36,8 +37,8 @@ module.exports = grammar({
             ']'
         ),
 
-        title: $ => seq($.string_literal, spaced("by"), $.identifier, $._newline),
-        section_heading: $ => seq(s("section"), optional($.number), "-", $.identifier),
+        title: $ => seq($.string_literal, spaced("by"), $.identifier, $.newline),
+        section_heading: $ => seq( choice(s("section"), s("chapter")), optional($.number), "-", $.identifier, $.newline),
         indefinite_article: $ => seq(choice(s("a"), s("an"))),
         definite_article: $ => s("the"),
         mass_article: $ => s("some"),
@@ -46,7 +47,7 @@ module.exports = grammar({
         full_stop: $ => ".",
         semicolon: $ => ";",
         understand_statement: $ => seq(s("understand"), space($.string_literal), s("as"), $._expression),
-        has_statement: $ => seq($._expression, s("has"), $._expression, s("called"), $._expression),
+        has_statement: $ => seq($._expression, s("has"), $._expression),
         can_be_statement: $ => seq($._expression, s("can"), s("be"), $._expression),
         action_statement: $ => seq($._expression, /is +an +action +applying +to +/, $.action_quantifier),
         action_quantifier: $ => choice(
@@ -54,13 +55,15 @@ module.exports = grammar({
             seq(space($.number), $._expression),
         ),
 
-        is_fragment: $ => prec.left(seq(
+
+
+        is_fragment: $ => prec.left(0, seq(
             $._expression,
             choice(s("is"), s("are")),
             $._expression,
         )),
 
-        _fragment_termination: $ => choice($.full_stop, $.semicolon),
+        fragment_termination: $ => choice($.full_stop, $.semicolon),
 
         say_statement: $ => seq(
             s("say"),
@@ -171,12 +174,13 @@ To decide which number is the max purr power of (kitty - a cat):
             $.suite
           ),
 
-
+        /*
         is_statement: $ => seq(
             $._expression,
             choice(s("is"), s("are")),
             $._expression,
         ),
+        */
 
         // repeat with bill offered running through money:
         repeat_with_statement: $ => seq(
@@ -189,21 +193,23 @@ To decide which number is the max purr power of (kitty - a cat):
         ),
 
 
-        simple_if: $ => seq(
+        simple_if: $ => prec(0, seq(
             s("if"),
             $._expression,
             ",",
             $._simple_statement,
-        ),
+        )),
+
+
 
         _simple_statements: $ => seq(
             $._simple_statement,
             optional(repeat(seq(
-              $._fragment_termination,
+              repeat1($.fragment_termination),
               $._simple_statement
             ))),
-            optional($._fragment_termination),
-            $._newline
+            repeat1($.fragment_termination),
+            $.newline
           ),
 
 
@@ -211,16 +217,16 @@ To decide which number is the max purr power of (kitty - a cat):
         suite: $ => choice(
             alias($._simple_statements, $.block),
             seq($._indent, $.block),
-            alias($._newline, $.block),
+            alias($.newline, $.block),
         ),
 
+        expression_statement: $ => $._expression,
 
         _simple_statement: $ => seq(
             choice(
-                $.section_heading,
+                //$.section_heading,
                 $.now_statement,
                 $.say_statement,
-                $.is_statement,
                 $.understand_statement,
                 $.has_statement,
                 $.can_be_statement,
@@ -228,6 +234,7 @@ To decide which number is the max purr power of (kitty - a cat):
                 $.decide_statement,
                 $.let_statement,
                 $.simple_if,
+                $.expression_statement,
             ),
         ),
 
@@ -241,6 +248,7 @@ To decide which number is the max purr power of (kitty - a cat):
             $.to_decide_statement,
             $.shorthand_rule,
             $.repeat_with_statement,
+            $.section_heading,
         ),
 
         block: $ => seq(
@@ -250,6 +258,8 @@ To decide which number is the max purr power of (kitty - a cat):
 
 
         after: $ => s("after"),
+        before: $ => s("before"),
+        every: $ => s("every"),
         carry_out: $ => seq(s("carry"), s("out")),
         instead: $ => seq( s("instead"), optional(s("of")) ),
         check: $ => s("check"),
@@ -257,12 +267,13 @@ To decide which number is the max purr power of (kitty - a cat):
 
         _shortand_rule_type: $ => choice(
             $.after,
+            $.before,
+            $.every,
             $.carry_out,
             $.instead,
             $.check,
             $.report,
         ),
-
 
         shorthand_rule: $ => seq(
             $._shortand_rule_type,
@@ -290,9 +301,15 @@ To decide which number is the max purr power of (kitty - a cat):
         in_expression: $ => prec.left(seq($._expression, s("in"), $._expression)),
         provides_expression: $ => prec.left(seq($._expression, s("provides"), $._expression)),
         enclosed_expression: $ => prec.right(seq(s("enclosed"), s("by"), $._expression)),
-        called_parenthetical: $ => prec.right(seq($._expression,
+        called_expression: $ => prec.right(seq($._expression, s("called"), $.identifier)),
+        when_where_expression: $ => prec.right(seq($._expression, choice( s("when"), s("where")), $._expression)),
+        called_parenthetical: $ => prec.right(seq(
+            $._expression,
             "(",
-            s("called"),
+            choice(
+                s("called"),
+                seq( s("this"), s("is") )
+            ),
             $.identifier,
             ")"
         )),
@@ -303,9 +320,9 @@ To decide which number is the max purr power of (kitty - a cat):
             $._expression,
         )),
 
-        comma_separated_list: $ => prec.right(seq(
+        comma_separated_list: $ => prec.right(0, seq(
             $._expression,
-            repeat1(prec.left(seq(",", optional(s("and")), $._expression))),
+            repeat1(prec.left(0, seq(",", optional(s("and")), $._expression))),
         )),
 
         _expression: $ => choice(
@@ -323,15 +340,14 @@ To decide which number is the max purr power of (kitty - a cat):
             $.called_parenthetical,
             $.is_fragment,
             $.string_literal,
-            //$.terminated_string,
+            $.called_expression,
+            $.when_where_expression,
         ),
 
         // this needs a lot of work.
         text_substitution: $ => seq("[",choice(
             $._expression,
             "one of",
-            "'re",
-            "/i"
             ),
         "]"),
 
@@ -341,9 +357,10 @@ To decide which number is the max purr power of (kitty - a cat):
                 choice(
                     $.text_substitution,
                     token.immediate(prec(1, /[^\\"\[\]]+/)),
+                    //$.punctuation_in_literal,
                 ),
             ),
-            '"',
+            '"'
         ),
 
         terminated_string: $ => seq(
