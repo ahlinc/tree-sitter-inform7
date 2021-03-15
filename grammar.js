@@ -19,7 +19,7 @@ module.exports = grammar({
         $._newline,
         $._indent,
         $._dedent,
-      ],
+    ],
 
 
     rules: {
@@ -60,7 +60,11 @@ module.exports = grammar({
             $._expression,
         )),
 
-        _fragment_termination: $ => choice($.full_stop, $.semicolon),
+        _fragment_termination: $ => choice(
+            $.terminated_string,
+            $.full_stop,
+            $.semicolon,
+        ),
 
         say_statement: $ => seq(
             s("say"),
@@ -100,14 +104,14 @@ module.exports = grammar({
         ),
 
 
-          /*
+        /*
 
 To decide which number is the max purr power of (kitty - a cat):
-	if config of kitty is bagpipes:
-		decide on 18;
-	otherwise:
-        decide on 9.
-        */
+  if config of kitty is bagpipes:
+      decide on 18;
+  otherwise:
+      decide on 9.
+      */
 
         decide_statement: $ => seq(
             s("decide"),
@@ -169,7 +173,7 @@ To decide which number is the max purr power of (kitty - a cat):
             $.prototype_sequence,
             ":",
             $.suite
-          ),
+        ),
 
 
         is_statement: $ => seq(
@@ -196,16 +200,17 @@ To decide which number is the max purr power of (kitty - a cat):
             $._simple_statement,
         ),
 
-        _simple_statements: $ => seq(
+        _simple_statements: $ => prec.left(seq(
             $._simple_statement,
-            optional(repeat(seq(
-              $._fragment_termination,
-              $._simple_statement
-            ))),
-            optional($._fragment_termination),
-            $._newline
-          ),
-
+            repeat(seq(
+                $._fragment_termination,
+                $._simple_statement
+            )),
+            choice(
+                $._fragment_termination,
+                $._newline,
+            )
+        )),
 
 
         suite: $ => choice(
@@ -234,7 +239,7 @@ To decide which number is the max purr power of (kitty - a cat):
         _statement: $ => choice(
             $._simple_statements,
             $._compound_statement
-          ),
+        ),
 
         _compound_statement: $ => choice(
             $.if_statement,
@@ -251,7 +256,7 @@ To decide which number is the max purr power of (kitty - a cat):
 
         after: $ => s("after"),
         carry_out: $ => seq(s("carry"), s("out")),
-        instead: $ => seq( s("instead"), optional(s("of")) ),
+        instead: $ => seq(s("instead"), optional(s("of"))),
         check: $ => s("check"),
         report: $ => s("report"),
 
@@ -281,12 +286,12 @@ To decide which number is the max purr power of (kitty - a cat):
                 $.number_type,
                 $.text_type,
                 $.value_type,
-        )),
+            )),
 
-        kind_of_expression: $ => prec.left( seq( /a +kind +of +/,  $._expression)),
-        of_expression: $ => prec.left( seq($._expression, s("of"), $._expression) ),
-        not_expression: $ => prec.left(seq( s("not"), $._expression)),
-        usually_expression: $ => prec.left(seq( s("usually"), $._expression)),
+        kind_of_expression: $ => prec.left(seq(/a +kind +of +/, $._expression)),
+        of_expression: $ => prec.left(seq($._expression, s("of"), $._expression)),
+        not_expression: $ => prec.left(seq(s("not"), $._expression)),
+        usually_expression: $ => prec.left(seq(s("usually"), $._expression)),
         in_expression: $ => prec.left(seq($._expression, s("in"), $._expression)),
         provides_expression: $ => prec.left(seq($._expression, s("provides"), $._expression)),
         enclosed_expression: $ => prec.right(seq(s("enclosed"), s("by"), $._expression)),
@@ -299,7 +304,7 @@ To decide which number is the max purr power of (kitty - a cat):
 
         binary_expression: $ => prec.left(seq(
             $._expression,
-            token(choice(">", "<", "+", "-", "*", "/", ">=", "<=", s("and"), s("or") )),
+            token(choice(">", "<", "+", "-", "*", "/", ">=", "<=", s("and"), s("or"))),
             $._expression,
         )),
 
@@ -327,13 +332,13 @@ To decide which number is the max purr power of (kitty - a cat):
         ),
 
         // this needs a lot of work.
-        text_substitution: $ => seq("[",choice(
+        text_substitution: $ => seq("[", choice(
             $._expression,
             "one of",
             "'re",
             "/i"
-            ),
-        "]"),
+        ),
+            "]"),
 
         string_literal: $ => seq(
             '"',
@@ -358,8 +363,8 @@ To decide which number is the max purr power of (kitty - a cat):
             '"',
         ),
 
-        number: $ => choice("zero", "one","two","three","four","five","six","seven","eight","nine","ten","eleven","tweleve", /\d+/),
-      }
+        number: $ => choice("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "tweleve", /\d+/),
+    }
 });
 
 function spaced(rule) {
@@ -372,21 +377,21 @@ function space(rule) {
     return seq(rule, token(/ +/))
 }
 
-function CI (keyword) {
+function CI(keyword) {
     return new RegExp(keyword
-      .split('')
-      .map(letter => `[${letter}${letter.toUpperCase()}]`)
-      .join('')
-      .concat(' *')
+        .split('')
+        .map(letter => `[${letter}${letter.toUpperCase()}]`)
+        .join('')
+        .concat(' *')
 
     )
-  }
+}
 
-function s (keyword) {
+function s(keyword) {
     return new RegExp(keyword
-      .split('')
-      .map(letter => `[${letter}${letter.toUpperCase()}]`)
-      .join('')
-      .concat(' +')
+        .split('')
+        .map(letter => `[${letter}${letter.toUpperCase()}]`)
+        .join('')
+        .concat(' +')
     )
-  }
+}
