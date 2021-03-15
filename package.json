@@ -2,7 +2,7 @@
   "name": "tree-sitter-inform7",
   "version": "1.0.0",
   "description": "parser for inform 7",
-  "main": "index.js",
+  "main": "bindings/node",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
