@@ -1,0 +1,7 @@
+Cargo.toml
+bindings/
+build/
+node_modules/
+src/parser.c
+src/tree_sitter/
+*.json
