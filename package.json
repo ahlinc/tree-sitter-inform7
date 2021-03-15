@@ -4,6 +4,7 @@
   "description": "parser for inform 7",
   "main": "bindings/node",
   "scripts": {
+    "install": "tree-sitter generate && node-gyp rebuild",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "kelly macneill",
