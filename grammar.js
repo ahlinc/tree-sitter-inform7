@@ -293,13 +293,21 @@ To decide which number is the max purr power of (kitty - a cat):
         not_expression: $ => prec.left(seq(s("not"), $._expression)),
         usually_expression: $ => prec.left(seq(s("usually"), $._expression)),
         in_expression: $ => prec.left(seq($._expression, s("in"), $._expression)),
-        provides_expression: $ => prec.left(seq($._expression, s("provides"), $._expression)),
+        // provides_expression: $ => prec.left(seq($._expression, s("provides"), $._expression)),
         enclosed_expression: $ => prec.right(seq(s("enclosed"), s("by"), $._expression)),
         called_parenthetical: $ => prec.right(seq($._expression,
             "(",
             s("called"),
             $.identifier,
             ")"
+        )),
+        action_expression: $ => prec.left(seq(
+            $._expression,
+            choice(
+                s("provides"),
+                s("carries"),
+            ),
+            $._expression,
         )),
 
         binary_expression: $ => prec.left(seq(
@@ -323,7 +331,8 @@ To decide which number is the max purr power of (kitty - a cat):
             $.built_in_type,
             $.number,
             $.comma_separated_list,
-            $.provides_expression,
+            // $.provides_expression,
+            $.action_expression,
             $.binary_expression,
             $.called_parenthetical,
             $.is_fragment,
