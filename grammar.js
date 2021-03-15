@@ -20,7 +20,7 @@ module.exports = grammar({
         $._indent,
         $._dedent,
       ],
-    
+
 
     rules: {
         source_file: $ => seq($.title, repeat1($._statement)),
@@ -35,7 +35,7 @@ module.exports = grammar({
             repeat(choice(/./, $.block_comment)),
             ']'
         ),
-    
+
         title: $ => seq($.string_literal, spaced("by"), $.identifier, $._newline),
         section_heading: $ => seq(s("section"), optional($.number), "-", $.identifier),
         indefinite_article: $ => seq(choice(s("a"), s("an"))),
@@ -92,7 +92,7 @@ module.exports = grammar({
             ':',
             field('consequence', $.suite)
         ),
-    
+
         else_clause: $ => seq(
             'otherwise',
             ":",
@@ -101,33 +101,33 @@ module.exports = grammar({
 
 
           /*
-          
-To decide which number is the max purr power of (kitty - a cat): 
+
+To decide which number is the max purr power of (kitty - a cat):
 	if config of kitty is bagpipes:
 		decide on 18;
 	otherwise:
         decide on 9.
         */
-          
+
         decide_statement: $ => seq(
             s("decide"),
             s("on"),
             $._expression,
-        ),  
-          
+        ),
+
 
         /*
-        To decide what price is the player's cash: 
-            let sum be the total price of money enclosed by the player; 
-            decide on sum. 
+        To decide what price is the player's cash:
+            let sum be the total price of money enclosed by the player;
+            decide on sum.
 
-        To decide what price is the sum in (item - a container): 
-            let sum be the total price of the money in the item; 
-            decide on sum. 
+        To decide what price is the sum in (item - a container):
+            let sum be the total price of the money in the item;
+            decide on sum.
 
-        To decide what money is the best money from (buyer - a thing) for (cost - a price): 
+        To decide what money is the best money from (buyer - a thing) for (cost - a price):
 
-        To decide what number is double (N - a number) (this is doubling): 
+        To decide what number is double (N - a number) (this is doubling):
         */
 
         parameter: $ => seq(
@@ -153,7 +153,7 @@ To decide which number is the max purr power of (kitty - a cat):
             )
         ),
 
-        // let sum be the total price of money enclosed by the player; 
+        // let sum be the total price of money enclosed by the player;
         let_statement: $ => seq(
             s("let"),
             $.identifier,
@@ -171,14 +171,14 @@ To decide which number is the max purr power of (kitty - a cat):
             $.suite
           ),
 
-          
+
         is_statement: $ => seq(
             $._expression,
             choice(s("is"), s("are")),
             $._expression,
         ),
 
-        // repeat with bill offered running through money: 
+        // repeat with bill offered running through money:
         repeat_with_statement: $ => seq(
             s("repeat"), s("with"),
             field("iterator", $.identifier),
@@ -205,7 +205,7 @@ To decide which number is the max purr power of (kitty - a cat):
             optional($._fragment_termination),
             $._newline
           ),
-      
+
 
 
         suite: $ => choice(
@@ -230,12 +230,12 @@ To decide which number is the max purr power of (kitty - a cat):
                 $.simple_if,
             ),
         ),
-            
+
         _statement: $ => choice(
             $._simple_statements,
             $._compound_statement
           ),
-      
+
         _compound_statement: $ => choice(
             $.if_statement,
             $.to_decide_statement,
@@ -247,7 +247,7 @@ To decide which number is the max purr power of (kitty - a cat):
             repeat($._statement),
             $._dedent
         ),
-        
+
 
         after: $ => s("after"),
         carry_out: $ => seq(s("carry"), s("out")),
@@ -261,7 +261,7 @@ To decide which number is the max purr power of (kitty - a cat):
             $.instead,
             $.check,
             $.report,
-        ),           
+        ),
 
 
         shorthand_rule: $ => seq(
@@ -282,9 +282,9 @@ To decide which number is the max purr power of (kitty - a cat):
                 $.text_type,
                 $.value_type,
         )),
-    
-        kind_of_expression: $ => prec.left( seq( /a +kind +of +/,  $._expression)), 
-        of_expression: $ => prec.left( seq($._expression, s("of"), $._expression) ), 
+
+        kind_of_expression: $ => prec.left( seq( /a +kind +of +/,  $._expression)),
+        of_expression: $ => prec.left( seq($._expression, s("of"), $._expression) ),
         not_expression: $ => prec.left(seq( s("not"), $._expression)),
         usually_expression: $ => prec.left(seq( s("usually"), $._expression)),
         in_expression: $ => prec.left(seq($._expression, s("in"), $._expression)),
@@ -332,7 +332,7 @@ To decide which number is the max purr power of (kitty - a cat):
             "one of",
             "'re",
             "/i"
-            ),   
+            ),
         "]"),
 
         string_literal: $ => seq(
@@ -345,7 +345,7 @@ To decide which number is the max purr power of (kitty - a cat):
             ),
             '"',
         ),
-        
+
         terminated_string: $ => seq(
             '"',
             repeat(
@@ -357,18 +357,18 @@ To decide which number is the max purr power of (kitty - a cat):
             '.',
             '"',
         ),
-    
+
         number: $ => choice("zero", "one","two","three","four","five","six","seven","eight","nine","ten","eleven","tweleve", /\d+/),
       }
 });
-  
+
 function spaced(rule) {
-    
+
     return seq(token(/ +/), rule, token(/ +/))
 }
 
 function space(rule) {
-    
+
     return seq(rule, token(/ +/))
 }
 
@@ -377,7 +377,7 @@ function CI (keyword) {
       .split('')
       .map(letter => `[${letter}${letter.toUpperCase()}]`)
       .join('')
-      .concat(' *')  
+      .concat(' *')
 
     )
   }
@@ -387,6 +387,6 @@ function s (keyword) {
       .split('')
       .map(letter => `[${letter}${letter.toUpperCase()}]`)
       .join('')
-      .concat(' +')  
+      .concat(' +')
     )
   }
